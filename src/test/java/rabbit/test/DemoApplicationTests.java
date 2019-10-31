@@ -1,6 +1,10 @@
 package rabbit.test;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +20,24 @@ class DemoApplicationTests {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    AmqpAdmin amqpAdmin;   //注入AmqpAdmin系统管理逐渐
+
     /**
-     * 1.测试单播的点对点消息
+     * AmqpAdmin创建和删除消息队列、交换器、绑定规则等测试
+     */
+    @Test
+    void TestAmqpAdmin(){
+//        amqpAdmin.declare开头为创建组件
+//        amqpAdmin.declareExchange(new DirectExchange("test_exchange"));
+//        amqpAdmin.declareQueue(new Queue("test_queue"));
+        amqpAdmin.declareBinding(new Binding("test_queue", Binding.DestinationType.QUEUE, "test_exchange","test_l",null));
+        System.out.println("创建完成");
+
+    }
+
+    /**
+     * 测试单播的点对点消息
      */
     @Test
     void contextLoads() {
@@ -31,7 +51,7 @@ class DemoApplicationTests {
         map.put("data", Arrays.asList("hello world", 123, "sad"));
         //对象默认使用的是java默认的序列化规则。。。序列化之后看球不懂
 //        rabbitTemplate.convertAndSend("exchange.direct","learn.news",map);
-        rabbitTemplate.convertAndSend("exchange.direct","learn.news",new Book("asd","mzd"));
+        rabbitTemplate.convertAndSend("test_exchange","test_l",new Book("asd222","mzd"));
     }
 
 
@@ -49,7 +69,9 @@ class DemoApplicationTests {
      */
     @Test
     void guangbo(){
-        rabbitTemplate.convertAndSend("exchange.fanout","",new Book("asd222","mzd222"));
+        rabbitTemplate.convertAndSend("learn_news","",new Book("asd222","mzd222"));
     }
+
+
 
 }
